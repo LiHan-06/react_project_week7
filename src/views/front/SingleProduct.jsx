@@ -34,7 +34,7 @@ function SingleProduct() {
             const reponse = await axios.post(`${API_BASE}/api/${API_PATH}/cart`,{
                 data
             })
-            console.log(reponse.data)
+            alert('已加入購物車')
         } catch (error) {
             
         }
