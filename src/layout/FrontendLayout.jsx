@@ -20,7 +20,7 @@ function FrontendLayout() {
                 <Outlet />
             </main>
             <footer className="mt-5 text-center">
-                <p>第五周作業</p>
+                <p>第六周作業</p>
             </footer>
         </>
     )
