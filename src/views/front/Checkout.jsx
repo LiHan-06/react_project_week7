@@ -3,13 +3,17 @@
 
     import { currency } from '../../utils/filter';
 import { useForm } from "react-hook-form";
+import { RotatingLines } from "react-loader-spinner";
 
 
     const API_BASE = import.meta.env.VITE_API_BASE;
     const API_PATH = import.meta.env.VITE_API_PATH;
 
     function Checkout() {
+        const [products, setProducts] = useState([]);
         const [cart, setCart] = useState([]);
+        const [loadingCartId, setLoadingCartId] = useState(null);
+        const [loadingProductId, setLoadingProductId] = useState(null);
 
         const {
             register,
@@ -18,6 +22,18 @@ import { useForm } from "react-hook-form";
         } = useForm({
             mode: 'onChange'
         })
+
+        useEffect(() => {  
+            const getProducts = async () => {
+                try {
+                    const response = await axios.get(`${API_BASE}/api/${API_PATH}/products`,)
+                    setProducts(response.data.products);
+                } catch (error) {
+                    alert(error.message);
+                }
+            }
+            getProducts();
+        }, [])
 
         useEffect(()=>{
             const getCart = async()=>{
@@ -29,7 +45,27 @@ import { useForm } from "react-hook-form";
                 }
             }
             getCart();
-        },[])
+        },[]);
+
+        const addCart = async(id,qty=1)=>{
+            setLoadingCartId(id);
+            try {
+                const data = {
+                    product_id: id,
+                    qty
+                }
+                const reponse = await axios.post(`${API_BASE}/api/${API_PATH}/cart`,{
+                    data
+                })
+                const response2 = await axios.get(`${API_BASE}/api/${API_PATH}/cart`)
+                setCart(response2.data.data);
+                alert('已加入購物車')
+            } catch (error) {
+                
+            } finally{
+                setLoadingCartId(null);
+            }
+        };
 
         const updataCart = async(cartId, productId, qty=1)=>{
             try {
@@ -75,6 +111,64 @@ import { useForm } from "react-hook-form";
 
         return(
             <div className="container">
+                {/* 產品列表 */}
+                <table className="table align-middle">
+                    <thead>
+                        <tr>
+                        <th>圖片</th>
+                        <th>商品名稱</th>
+                        <th>價格</th>
+                        <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {
+                            products.map(product => (
+                                <tr key={product.id}>
+                                    <td style={{ width: "200px" }}>
+                                        <div
+                                        style={{
+                                            height: "100px",
+                                            backgroundSize: "cover",
+                                            backgroundPosition: "center",
+                                            backgroundImage: `url(${product.imageUrl})`,
+                                        }}
+                                        ></div>
+                                    </td>
+                                    <td>{product.title}</td>
+                                    <td>
+                                        <del className="h6">原價：{product.origin_price}</del>
+                                        <div className="h5">特價：{product.price}</div>
+                                    </td>
+                                    <td>
+                                        <div className="btn-group btn-group-sm">
+                                        <button type="button" className="btn btn-outline-secondary">
+                                            <i className="fas fa-spinner fa-pulse"></i>
+                                            查看更多
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            className="btn btn-outline-danger" 
+                                            onClick={()=>addCart(product.id)}
+                                            disabled={loadingCartId === product.id}
+                                        >
+                                            {
+                                            loadingCartId === product.id ? (
+                                                <RotatingLines 
+                                                color='gray'
+                                                width={80}
+                                                height={16}
+                                                />
+                                            ):'加到購物車'
+                                            }
+                                        </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        }
+                    </tbody>
+                </table>
                 <h2>購物車列表</h2>
                 <div className="text-end mt-4">
                     <button type="button" className="btn btn-outline-danger">
