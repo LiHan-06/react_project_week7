@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from "axios";
 import { useForm } from 'react-hook-form';
+import { useNavigate } from "react-router-dom";
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 const API_PATH = import.meta.env.VITE_API_PATH;
@@ -12,17 +13,20 @@ function Login({getProducts,setIsAuth}) {
     //         password:''
     //     });
     
-        const {
-            register,
-            handleSubmit,
-            formState: { errors }
-        } = useForm({
-            mode:'onChange',
-            defaultValues:{
-                username:'',
-                password:''
-            }
-        })
+
+    const navigate = useNavigate();
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors }
+    } = useForm({
+        mode:'onChange',
+        defaultValues:{
+            username:'',
+            password:''
+        }
+    })
 
     // const handleInputChange = (e) => {
     //     const {name,value} = e.target
@@ -41,7 +45,8 @@ function Login({getProducts,setIsAuth}) {
         const {token, expired} = response.data;
         document.cookie = `hexToken=${token};expires=${new Date(expired)};`;
         axios.defaults.headers.common['Authorization'] = token;
-
+        
+        navigate('/admin/product');
         // getProducts();
         // setIsAuth(true);
         } catch (error) {
